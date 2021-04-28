@@ -12,7 +12,7 @@ import java.util.Date;
 public class HelloController {
 
     @GetMapping(value = "hello")
-    @RateLimit(2)
+    @RateLimit(100)
     public String hello(){
         return new Date().toString();
     }
