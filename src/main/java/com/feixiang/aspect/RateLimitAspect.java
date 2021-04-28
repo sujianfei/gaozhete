@@ -2,6 +2,7 @@ package com.feixiang.aspect;
 
 import com.alibaba.fastjson.JSONObject;
 import com.feixiang.TimeCount;
+import com.feixiang.annotation.RateLimit;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
@@ -31,8 +32,9 @@ public class RateLimitAspect {
 
     }
 
-    @Around("pointCut()")
-    public Object around(ProceedingJoinPoint point) throws Throwable {
+    @Around("pointCut() && @annotation(rateLimit)")
+    public Object around(ProceedingJoinPoint point, RateLimit rateLimit) throws Throwable {
+        int limit=rateLimit.value();
         Signature signature = point.getSignature();
         MethodSignature methodSignature = (MethodSignature) signature;
         String className = methodSignature.getDeclaringTypeName();
@@ -50,7 +52,7 @@ public class RateLimitAspect {
             if (timeCount.equalsCurrrentTime()) {
                 int count = timeCount.getCount();
                 count++;
-                if (count > 100) {
+                if (count > limit) {
                     flag = false;
                 } else {
                     timeCount.setCount(count);
